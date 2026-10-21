@@ -17,6 +17,6 @@ export const ENV = {
   ADMIN_EMAIL: process.env.ADMIN_EMAIL || "admin@example.com",
   ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || "Changeme",
   CLIENT_ORIGIN: process.env.CLIENT_ORIGIN
-    ? process.env.CLIENT_ORIGIN.split(",").map((s) => s.trim())
+    ? process.env.CLIENT_ORIGIN.split(",").map((s) => s.trim().replace(/\/+$/, "")).filter(Boolean)
     : ["http://localhost:5173"],
 };

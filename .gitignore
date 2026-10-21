@@ -3,6 +3,7 @@
 .env.*
 !.env.example
 *.local
+cookies.txt
 
 # Node modules & logs
 node_modules/

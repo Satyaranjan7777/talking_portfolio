@@ -27,10 +27,23 @@ app.set("trust proxy", 1);
 
 const server = http.createServer(app);
 
+function isOriginAllowed(origin) {
+  if (!origin) return true;
+  const normalizedOrigin = origin.trim().replace(/\/+$/, "");
+  return ENV.CLIENT_ORIGIN.some((allowed) => {
+    return allowed.trim().replace(/\/+$/, "") === normalizedOrigin;
+  });
+}
+
 // Initialize Socket.io
 export const io = new Server(server, {
   cors: {
-    origin: ENV.CLIENT_ORIGIN,
+    origin: (origin, callback) => {
+      if (isOriginAllowed(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("Socket CORS violation"), false);
+    },
     credentials: true,
   },
 });
@@ -112,11 +125,10 @@ app.use(
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps, curl) or if origin is in allowlist
-      if (!origin || ENV.CLIENT_ORIGIN.includes(origin)) {
+      if (isOriginAllowed(origin)) {
         return callback(null, true);
       }
-      return callback(new Error("CORS policy violation: origin not allowed"));
+      return callback(new Error(`CORS policy violation: origin '${origin}' not allowed`));
     },
     credentials: true,
   })
