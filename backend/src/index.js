@@ -14,6 +14,7 @@ import { fileURLToPath } from "url";
 import authRoutes from "./routes/authRoutes.js";
 import contentRoutes from "./routes/contentRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
+import { Admin } from "./models/Admin.js";
 import { getPublicResumeRedirect } from "./controllers/resumeController.js";
 
 
@@ -157,9 +158,34 @@ app.use((req, res) => {
 // Central Error Handler
 app.use(errorHandler);
 
+async function ensureInitialAdmin() {
+  try {
+    if (!ENV.ADMIN_EMAIL || !ENV.ADMIN_PASSWORD) return;
+    const email = ENV.ADMIN_EMAIL.toLowerCase().trim();
+    let admin = await Admin.findOne({ email });
+    const passwordHash = await Admin.hashPassword(ENV.ADMIN_PASSWORD);
+    if (!admin) {
+      await Admin.create({
+        email,
+        passwordHash,
+      });
+      console.log(`[Admin Bootstrap] Created admin account: ${email}`);
+    } else {
+      admin.passwordHash = passwordHash;
+      admin.failedLoginAttempts = 0;
+      admin.lockUntil = null;
+      await admin.save();
+      console.log(`[Admin Bootstrap] Synced admin credentials for: ${email}`);
+    }
+  } catch (err) {
+    console.error("[Admin Bootstrap Error]", err);
+  }
+}
+
 // Connect DB & Start Server
 async function startServer() {
   await connectDB();
+  await ensureInitialAdmin();
 
   server.listen(ENV.PORT, () => {
     console.log(`\n=============================================`);
