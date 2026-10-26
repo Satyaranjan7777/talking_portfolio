@@ -143,19 +143,19 @@ export default function Navigation() {
                 key={item.id}
                 href={`#${item.id}`}
                 onClick={(e) => handleNavClick(e, item.id)}
-                className={`relative px-4 py-2 text-[13.5px] font-medium tracking-tight rounded-full transition-colors duration-200 ${
+                className={`relative isolate px-4 py-2 text-[13.5px] font-medium tracking-tight rounded-full transition-colors duration-200 ${
                   isActive ? "text-[#f4f2ee]" : "text-[#3a3a3a] hover:text-[#0d0d0d]"
                 }`}
               >
                 {isActive && (
                   <span
-                    className="absolute inset-0 bg-[#0d0d0d] rounded-full -z-10 transition-all duration-300"
+                    className="absolute inset-0 bg-[#0d0d0d] rounded-full transition-all duration-300"
                     style={{
                       boxShadow: "0 2px 8px rgba(13,13,13,0.18)",
                     }}
                   />
                 )}
-                {item.label}
+                <span className="relative z-10">{item.label}</span>
               </a>
             );
           })}
